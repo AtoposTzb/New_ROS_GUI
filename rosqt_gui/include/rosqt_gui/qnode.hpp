@@ -32,6 +32,7 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>//存放图像编码格式
+#include <sensor_msgs/CompressedImage.h>//
 #include <QImage>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>//位姿的消息类型
 #include <geometry_msgs/PoseStamped.h>//导航目标点的消息类型
@@ -117,6 +118,7 @@ private:
 	ros::Publisher chatter_publisher;
     ros::Publisher cmd_vel_pub;//速度控制发布者
     ros::Publisher New_PTZ_pub;//云台PTZ
+    ros::Subscriber Now_PTZ_sub;//云台订阅者
     ros::Publisher goal_pub;//发布导航目标点的话题发布者S
 
     QStringListModel logging_model;
@@ -125,12 +127,14 @@ private:
     ros::Subscriber battery_sub;//电池电压
     ros::Subscriber amcl_pose_sub;//位姿的
     image_transport::Subscriber image_sub;
+    yzz_msgs::GetHolder NowPTZ;
 
     void chatter_callback(const std_msgs::String &msg);//shengminghuidiaohanshu
     void odom_callback(const nav_msgs::Odometry &msg);
     void battery_callback(const yzz_msgs::Battery &msg);
     void image_callback(const sensor_msgs::ImageConstPtr &msg);
     void amcl_pose_callback(const geometry_msgs::PoseWithCovarianceStamped &msg);
+    void GetHolderCallback(yzz_msgs::GetHolder msg);
     QImage Mat2QImage(cv::Mat const& src);
 };
 

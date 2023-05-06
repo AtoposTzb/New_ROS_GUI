@@ -57,6 +57,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     //连接角速度线速度进度条显示
     connect(ui.horizontalSlider_linear,SIGNAL(valueChanged(int)),this,SLOT(slot_linear_value_change(int)));
     connect(ui.horizontalSlider_raw,SIGNAL(valueChanged(int)),this,SLOT(slot_raw_value_change(int)));
+
     connect(ui.pushButton_u,SIGNAL(clicked()),this,SLOT(slot_pushbtn_click()));
     connect(ui.pushButton_i,SIGNAL(clicked()),this,SLOT(slot_pushbtn_click()));
     connect(ui.pushButton_o,SIGNAL(clicked()),this,SLOT(slot_pushbtn_click()));
@@ -65,14 +66,6 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     connect(ui.pushButton_m,SIGNAL(clicked()),this,SLOT(slot_pushbtn_click()));
     connect(ui.pushButton_dian,SIGNAL(clicked()),this,SLOT(slot_pushbtn_click()));
     connect(ui.pushButton_dou,SIGNAL(clicked()),this,SLOT(slot_pushbtn_click()));
-    if(ui.PTZ_checkBox->isChecked())
-    {
-        connect(ui.pushButton_i,SIGNAL(clicked()),this,SLOT(slot_PTZ_pushbtn_click()));
-        connect(ui.pushButton_j,SIGNAL(clicked()),this,SLOT(slot_PTZ_pushbtn_click()));
-        connect(ui.pushButton_l,SIGNAL(clicked()),this,SLOT(slot_PTZ_pushbtn_click()));
-        connect(ui.pushButton_dou,SIGNAL(clicked()),this,SLOT(slot_PTZ_pushbtn_click()));
-    }
-
     //速度仪表盘实现
     //初始化u
     speed_x_dashBoard = new CCtrlDashBoard(ui.widget_speed_x);
@@ -525,92 +518,112 @@ void MainWindow::slot_pushbtn_click()
     qDebug()<<btn->text();
     char k = btn->text().toStdString()[0];//获取按键按下的字符
     //判断是否使用全向轮
-    bool is_all = ui.checkBox_isAll->isChecked();
+//    bool is_all = ui.checkBox_isAll->isChecked();
+    if(ui.PTZ_checkBox->isChecked())
+    {
+        k = toupper(k);
+        if(k == ',')
+        {
+            k = '<';
+        }
+        qDebug()<< k ;
+    }
+    //float pan_speed = 2;
+    //float tilt_speed = 2;
+    float pan_speed = ui.label_linear->text().toFloat()*0.1;
+    float tilt_speed = ui.label_raw->text().toFloat()*0.1;
     float linear = ui.label_linear->text().toFloat()*0.01;//cm / mm
     float angular = ui.label_raw->text().toFloat()*0.01;
-
     switch(k){
     case 'i':
-        qnode.set_cmd_vel(is_all?'I':'i' ,linear ,angular);
+        qnode.set_cmd_vel('i' ,linear ,angular);
         break;
     case 'u':
-        qnode.set_cmd_vel(is_all?'U':'u' ,linear ,angular);
+        qnode.set_cmd_vel('u' ,linear ,angular);
         break;
     case 'o':
-        qnode.set_cmd_vel(is_all?'O':'o' ,linear ,angular);
+        qnode.set_cmd_vel('o' ,linear ,angular);
         break;
     case 'j':
-        qnode.set_cmd_vel(is_all?'J':'j' ,linear ,angular);
+        qnode.set_cmd_vel('j' ,linear ,angular);
         break;
     case 'l':
-        qnode.set_cmd_vel(is_all?'L':'l' ,linear ,angular);
+        qnode.set_cmd_vel('l' ,linear ,angular);
         break;
     case 'm':
-        qnode.set_cmd_vel(is_all?'M':'m' ,linear ,angular);
+        qnode.set_cmd_vel('m' ,linear ,angular);
         break;
     case ',':
-        qnode.set_cmd_vel(is_all?'<':',' ,linear ,angular);
+        qnode.set_cmd_vel(',' ,linear ,angular);
         break;
     case '.':
-        qnode.set_cmd_vel(is_all?'>':'.' ,linear ,angular);
+        qnode.set_cmd_vel('.' ,linear ,angular);
         break;
-    }
-}
-
-void MainWindow::slot_PTZ_pushbtn_click()
-{
-    QPushButton*btn = qobject_cast<QPushButton*> (sender());
-    qDebug()<<btn->text();
-    char k = btn->text().toStdString()[0];//获取按键按下的字符
-    float pan_speed = ui.label_linear->text().toFloat()*0.01;//cm / mm
-    float tilt_speed = ui.label_raw->text().toFloat()*0.01;
-    switch(k){
-    case 'I':
+    case'I':
         qnode.set_PTZ_vel('I',pan_speed,tilt_speed);
         break;
-    case 'J':
-        qnode.set_cmd_vel('J',pan_speed,tilt_speed);
+    case'J':
+        qnode.set_PTZ_vel('J',pan_speed,tilt_speed);
         break;
-    case 'L':
-        qnode.set_cmd_vel('L',pan_speed,tilt_speed);
+    case'L':
+        qnode.set_PTZ_vel('L',pan_speed,tilt_speed);
         break;
-    case '<':
-        qnode.set_cmd_vel('<',pan_speed,tilt_speed);
+    case'<':
+        qnode.set_PTZ_vel('<',pan_speed,tilt_speed);
         break;
     }
-
 }
 void MainWindow::slot_rockKeyChange(int key){
     qDebug()<<"key: "<<key;
     //速度
     float liner=ui.horizontalSlider_linear->value()*0.01;
     float turn=ui.horizontalSlider_raw->value()*0.01;
-    bool is_all=ui.checkBox_isAll->isChecked();
-    switch (key) {
-    case upleft:
-        qnode.move_base(is_all?'U':'u',liner,turn);
-        break;
-    case up:
-        qnode.move_base(is_all?'I':'i',liner,turn);
-        break;
-    case upright:
-        qnode.move_base(is_all?'O':'o',liner,turn);
-        break;
-    case left:
-        qnode.move_base(is_all?'J':'j',liner,turn);
-        break;
-    case right:
-        qnode.move_base(is_all?'L':'l',liner,turn);
-        break;
-    case down:
-        qnode.move_base(is_all?'M':'m',liner,turn);
-        break;
-    case downleft:
-        qnode.move_base(is_all?'<':',',liner,turn);
-        break;
-    case downright:
-        qnode.move_base(is_all?'>':'.',liner,turn);
-        break;
+    float pan_speed = ui.label_linear->text().toFloat()*0.1;
+    float tilt_speed = ui.label_raw->text().toFloat()*0.1;
+    //  bool is_all=ui.checkBox_isAll->isChecked();
+    if(ui.PTZ_checkBox->isChecked())
+    {
+        switch (key) {
+        case up:
+            qnode.set_PTZ_vel('I',pan_speed,tilt_speed);
+            break;
+        case left:
+            qnode.set_PTZ_vel('J',pan_speed,tilt_speed);
+            break;
+        case right:
+            qnode.set_PTZ_vel('L',pan_speed,tilt_speed);
+            break;
+        case down:
+            qnode.set_PTZ_vel('<',pan_speed,tilt_speed);
+            break;
+        }
+    }else{
+        switch (key) {
+        case upleft:
+            qnode.move_base('u',liner,turn);
+            break;
+        case up:
+            qnode.move_base('i',liner,turn);
+            break;
+        case upright:
+            qnode.move_base('o',liner,turn);
+            break;
+        case left:
+            qnode.move_base('j',liner,turn);
+            break;
+        case right:
+            qnode.move_base('l',liner,turn);
+            break;
+        case down:
+            qnode.move_base(',',liner,turn);
+            break;
+        case downleft:
+            qnode.move_base('m',liner,turn);
+            break;
+        case downright:
+            qnode.move_base('.',liner,turn);
+            break;
+        }
     }
 }
 

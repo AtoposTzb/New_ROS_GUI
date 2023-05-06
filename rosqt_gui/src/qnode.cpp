@@ -53,6 +53,7 @@ bool QNode::init() {
     chatter_sub = n.subscribe("chatter",1000,&QNode::chatter_callback,this);
     cmd_vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel",50);
     New_PTZ_pub = n.advertise<yzz_msgs::SetHolder>("/SetHolder",50);//云台控制
+    Now_PTZ_sub = n.subscribe("/GetHolder",50,&QNode::GetHolderCallback,this);
     odom_sub = n.subscribe("raw_odom",1000,&QNode::odom_callback,this);//odom_callback回调函数
     battery_sub = n.subscribe("/battery_state",50,&QNode::battery_callback,this);
     amcl_pose_sub=n.subscribe("amcl_pose",1000,&QNode::amcl_pose_callback,this);
@@ -76,6 +77,7 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
     chatter_sub = n.subscribe("chatter",1000,&QNode::chatter_callback,this);
     cmd_vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel",50);
     New_PTZ_pub = n.advertise<yzz_msgs::SetHolder>("/SetHolder",50);//云台控制
+    Now_PTZ_sub = n.subscribe("/GetHolder",50,&QNode::GetHolderCallback,this);
     odom_sub = n.subscribe("raw_odom",1000,&QNode::odom_callback,this);//odom_callback回调函数
     battery_sub = n.subscribe("/battery_state",50,&QNode::battery_callback,this);
     amcl_pose_sub=n.subscribe("amcl_pose",1000,&QNode::amcl_pose_callback,this);
@@ -102,12 +104,18 @@ void QNode::amcl_pose_callback(const geometry_msgs::PoseWithCovarianceStamped &m
 {
     emit position(msg.pose.pose.position.x,msg.pose.pose.position.y,msg.pose.pose.orientation.z);
 }
+
+void QNode::GetHolderCallback(yzz_msgs::GetHolder msg)
+{
+    NowPTZ.angular_z = msg.angular_z;
+    NowPTZ.angular_y = msg.angular_y;
+}
 void QNode::sub_image(QString topic_name)
 {
     ros::NodeHandle n;//ros结构句柄
     image_transport::ImageTransport it_(n);//图像话题结构句柄，用NodeHandle进行初始化
     //初始化
-    image_sub = it_.subscribe(topic_name.toStdString(),1000,&QNode::image_callback,this);
+    image_sub = it_.subscribe(topic_name.toStdString(),50,&QNode::image_callback,this);
 }
 
 void QNode::image_callback(const sensor_msgs::ImageConstPtr &msg)
@@ -188,14 +196,14 @@ void QNode::set_cmd_vel(char k,float linear,float angular)
       {',', {-1, 0, 0, 0}},
       {'.', {-1, 0, 0, 1}},
       {'m', {-1, 0, 0, -1}},
-      {'O', {1, -1, 0, 0}},
-      {'I', {1, 0, 0, 0}},
-      {'J', {0, 1, 0, 0}},
-      {'L', {0, -1, 0, 0}},
-      {'U', {1, 1, 0, 0}},
-      {'<', {-1, 0, 0, 0}},
-      {'>', {-1, -1, 0, 0}},
-      {'M', {-1, 1, 0, 0}},
+//      {'O', {1, -1, 0, 0}},
+//      {'I', {1, 0, 0, 0}},
+//      {'J', {0, 1, 0, 0}},
+//      {'L', {0, -1, 0, 0}},
+//      {'U', {1, 1, 0, 0}},
+//      {'<', {-1, 0, 0, 0}},
+//      {'>', {-1, -1, 0, 0}},
+//      {'M', {-1, 1, 0, 0}},
       {'t', {0, 0, 1, 0}},
       {'b', {0, 0, -1, 0}},
       {'k', {0, 0, 0, 0}},
@@ -228,10 +236,10 @@ void QNode::move_base(char k, float speed_linear, float speed_trun)
     std::map<char, std::vector<float>> moveBindings{
         {'i', {1, 0, 0, 0}},  {'o', {1, 0, 0, -1}},  {'j', {0, 0, 0, 1}},
         {'l', {0, 0, 0, -1}}, {'u', {1, 0, 0, 1}},   {',', {-1, 0, 0, 0}},
-        {'.', {-1, 0, 0, 1}}, {'m', {-1, 0, 0, -1}}, {'O', {1, -1, 0, 0}},
-        {'I', {1, 0, 0, 0}},  {'J', {0, 1, 0, 0}},   {'L', {0, -1, 0, 0}},
-        {'U', {1, 1, 0, 0}},  {'<', {-1, 0, 0, 0}},  {'>', {-1, -1, 0, 0}},
-        {'M', {-1, 1, 0, 0}}, {'t', {0, 0, 1, 0}},   {'b', {0, 0, -1, 0}},
+        {'.', {-1, 0, 0, 1}}, {'m', {-1, 0, 0, -1}},
+    //   {'O', {1, -1, 0, 0}},{'I', {1, 0, 0, 0}},  {'J', {0, 1, 0, 0}},   {'L', {0, -1, 0, 0}},
+    //   {'U', {1, 1, 0, 0}},  {'<', {-1, 0, 0, 0}},  {'>', {-1, -1, 0, 0}},{'M', {-1, 1, 0, 0}},
+        {'t', {0, 0, 1, 0}},   {'b', {0, 0, -1, 0}},
         {'k', {0, 0, 0, 0}},  {'K', {0, 0, 0, 0}}};
     char key = k;
     //计算是往哪个方向
@@ -269,7 +277,6 @@ void QNode::set_PTZ_vel(char k, float pan_speed, float tilt_speed)
     float y = PTZBindings[key][0];
     float z = PTZBindings[key][1];
     yzz_msgs::SetHolder NewPTZ;
-    yzz_msgs::GetHolder NowPTZ;
     NewPTZ.angular_z = NowPTZ.angular_z + pan_speed * y;
     NewPTZ.angular_y = NowPTZ.angular_y + tilt_speed * z;
     if (NewPTZ.angular_z < 180 and NewPTZ.angular_z > 0 and NewPTZ.angular_y < 180 and NewPTZ.angular_y > 0)
