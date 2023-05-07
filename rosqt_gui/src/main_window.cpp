@@ -74,11 +74,12 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
     speed_y_dashBoard->setGeometry(ui.widget_speed_y->rect());
     speed_x_dashBoard->setValue(0);
     speed_y_dashBoard->setValue(0);//设置仪表盘默认指向
-    ui.horizontalSlider_linear->setValue(50);//设置默认
+    ui.horizontalSlider_linear->setValue(20);//设置默认
     ui.horizontalSlider_raw->setValue(50);
 
     //遥感
     connect(rock_widget,SIGNAL(keyNumchanged(int)),this,SLOT(slot_rockKeyChange(int)));
+
     //rviz
 //    ui.treeWidget->setWindowTitle("Display");
 //    ui.treeWidget->setWindowIcon(QIcon(":/images/display.png")); 使用label替换
@@ -490,15 +491,19 @@ void MainWindow::slot_sub_image()
 {
     qnode.sub_image(ui.lineEdit_image_topic->text());
 }
-
-void MainWindow::slot_update_dashboard(float x,float y)
+//y轴没有速度，改为z轴
+void MainWindow::slot_update_dashboard(float x,float z)
 {
     //将节点发送来的信号响应设置到仪表盘上
     speed_x_dashBoard->setValue(abs(x)*100);
-    speed_y_dashBoard->setValue(abs(y)*100);
+    speed_y_dashBoard->setValue(abs(z)*100);
     //方向
     ui.label_dir_x->setText(x>0?"正向":"反向");
-    ui.label_dir_y->setText(x>0?"正向":"反向");
+    ui.label_dir_y->setText(z>0?"正向":"反向");
+    const QString x_speed = QString::number(x).mid(0,4);
+    const QString y_speed = QString::number(z).mid(0,4);
+    ui.label_x_speed->setText(x_speed);
+    ui.label_y_speed->setText(y_speed);
 
 }
 

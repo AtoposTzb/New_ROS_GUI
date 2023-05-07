@@ -119,13 +119,15 @@ private:
     ros::Publisher cmd_vel_pub;//速度控制发布者
     ros::Publisher New_PTZ_pub;//云台PTZ
     ros::Subscriber Now_PTZ_sub;//云台订阅者
+    ros::Publisher set_pose_pub;
     ros::Publisher goal_pub;//发布导航目标点的话题发布者S
 
     QStringListModel logging_model;
     ros::Subscriber chatter_sub;//创建一个订阅者
     ros::Subscriber odom_sub;//里程计话题订阅者
     ros::Subscriber battery_sub;//电池电压
-    ros::Subscriber amcl_pose_sub;//位姿的
+    ros::Subscriber set_pose_sub;//位姿的
+
     image_transport::Subscriber image_sub;
     yzz_msgs::GetHolder NowPTZ;
 

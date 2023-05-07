@@ -40,7 +40,7 @@ void qrviz::Display_Srid(int Cell_Count, QColor color, bool enable)
         delete Grid_;
         Grid_ = NULL;
     }
-    Grid_=manager_->createDisplay("rviz/Grid", "myGrid" , enable);
+    Grid_=manager_->createDisplay("rviz/Grid", "Grid" , enable);
     //设置cell Count
     Grid_->subProp("Plane Cell Count")->setValue(Cell_Count);//Plane Cell Count属性设置需要用空格隔开，才能正常显示放大缩小
     //设置颜色
@@ -55,7 +55,7 @@ void qrviz::Display_TF(bool enable)
         delete TF_;
         TF_ = NULL;
     }
-    TF_ = manager_->createDisplay("rviz/TF", "myTF" , enable);
+    TF_ = manager_->createDisplay("rviz/TF", "TF" , enable);
     ROS_ASSERT(TF_ != NULL);
 }
 
@@ -66,7 +66,7 @@ void qrviz::Display_LaserScan(QString laser_topic, bool enable)
         delete LaserScan_;
         LaserScan_ = NULL;
     }
-    LaserScan_ = manager_->createDisplay("rviz/LaserScan", "myLaser" , enable);
+    LaserScan_ = manager_->createDisplay("rviz/LaserScan", "Laser" , enable);
     LaserScan_->subProp("Topic")->setValue(laser_topic);//属性设置
     ROS_ASSERT(LaserScan_ != NULL);
 }
@@ -79,7 +79,7 @@ void qrviz::Display_RobotModel(bool enable)
         delete RobotModel_;
         RobotModel_ = NULL;
     }
-    LaserScan_ = manager_->createDisplay("rviz/RobotModel", "myRobotModel" , enable);
+    LaserScan_ = manager_->createDisplay("rviz/RobotModel", "RobotModel" , enable);
     ROS_ASSERT(LaserScan_ != NULL);
 }
 
@@ -90,7 +90,7 @@ void qrviz::Display_Map(QString topic, QString color_scheme, bool enable)
         delete Map_;
         Map_ = NULL;
     }
-    Map_ = manager_->createDisplay("rviz/Map", "myMap" , enable);
+    Map_ = manager_->createDisplay("rviz/Map", "Map" , enable);
     ROS_ASSERT(Map_ != NULL);
     Map_->subProp("Topic")->setValue(topic);//属性设置
     Map_->subProp("Color Scheme")->setValue(color_scheme) ;//图层样式
@@ -103,7 +103,7 @@ void qrviz::Display_Path(QString topic, QColor color, bool enable)
         delete Path_;
         Path_ = NULL;
     }
-    Path_ = manager_->createDisplay("rviz/Path","myPath", enable);
+    Path_ = manager_->createDisplay("rviz/Path","Path", enable);
     ROS_ASSERT(Path_ != NULL);
     Path_->subProp("Topic")->setValue(topic);//属性设置
     Path_->subProp("Color")->setValue(color) ;//图层样式
