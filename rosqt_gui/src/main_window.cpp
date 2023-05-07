@@ -405,6 +405,7 @@ void MainWindow::slot_return_pos()
 
 void MainWindow::slot_update_pos(double x, double y, double z)
 {
+    qDebug()<<x<<" "<<y<<" "<<z<<" ";
     ui.pos_x->setText(QString::number(x));
     ui.pos_y->setText(QString::number(y));
     ui.pos_z->setText(QString::number(z));

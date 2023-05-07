@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS qt_build roscpp
     tf
     rviz
     yzz_msgs
+    yzz_description
 )
 include_directories(${catkin_INCLUDE_DIRS} ./include)
 

@@ -32,6 +32,8 @@
   <run_depend>libqt5-dev</run_depend>
   <build_depend>yzz_msgs</build_depend>
   <run_depend>yzz_msgs</run_depend>
+  <build_depend>yzz_description</build_depend>
+  <run_depend>yzz_description</run_depend>
 
  
 </package>

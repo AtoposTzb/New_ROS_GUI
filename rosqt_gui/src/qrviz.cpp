@@ -17,7 +17,7 @@ qrviz::qrviz(QVBoxLayout *layout)
     ROS_ASSERT(manager_ != NULL);//解决闪退BUG
     //初始化render_panel 实现放大缩小等操作
     render_panel->initialize(manager_->getSceneManager(), manager_);
-//   manager_->setFixedFrame("map");     可能会产生BUG
+    manager_->setFixedFrame("map");     //可能会产生BUG
 
     //初始化rviz控制对象
     manager_->initialize() ;
@@ -74,11 +74,42 @@ void qrviz::Display_LaserScan(QString laser_topic, bool enable)
 rviz::Display* RobotModel_ = NULL;//可以解决闪退BUG,当然也可以放在.hpp文件中
 void qrviz::Display_RobotModel(bool enable)
 {
-    if(RobotModel_ != NULL)//保持图层的唯一性
-    {
-        delete RobotModel_;
-        RobotModel_ = NULL;
-    }
+//    if(RobotModel_ != NULL)//保持图层的唯一性
+//    {
+//        delete RobotModel_;
+//        RobotModel_ = NULL;
+//    }
+//    // 获取机器人模型文件的路径
+//    std::string package_path = ros::package::getPath("");
+//    std::string relative_path = "/path/to/robot/model/file";
+//    std::string robot_model_path = package_path + relative_path;
+    if(enable)
+       {
+           if(RobotModel_ == NULL)
+           {
+               RobotModel_ = manager_->createDisplay("rviz/RobotModel", "RobotModel", enable);
+               ROS_ASSERT(RobotModel_ != NULL);
+               RobotModel_->setEnabled(true);
+               rviz::Config config;
+               RobotModel_->save(config);
+               config.mapSetValue("robot_description", "../../yzz_description/urdf/LA_4WD_LingFeng.urdf");
+               RobotModel_->load(config);
+           }
+           else
+           {
+               RobotModel_->setEnabled(true);
+           }
+       }
+       else
+       {
+           if(RobotModel_ != NULL)
+           {
+               RobotModel_->setEnabled(false);
+              // manager_->removeDisplay(RobotModel_);
+               delete RobotModel_;
+               RobotModel_ = NULL;
+           }
+       }
     LaserScan_ = manager_->createDisplay("rviz/RobotModel", "RobotModel" , enable);
     ROS_ASSERT(LaserScan_ != NULL);
 }

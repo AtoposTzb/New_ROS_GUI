@@ -56,9 +56,8 @@ bool QNode::init() {
     Now_PTZ_sub = n.subscribe("/GetHolder",50,&QNode::GetHolderCallback,this);
     odom_sub = n.subscribe("raw_odom",1000,&QNode::odom_callback,this);//odom_callback回调函数
     battery_sub = n.subscribe("/battery_state",50,&QNode::battery_callback,this);
-    set_pose_pub = n.advertise<geometry_msgs::PoseWithCovarianceStamped>("set_pose",50);
     set_pose_sub=n.subscribe("set_pose",1000,&QNode::amcl_pose_callback,this);
-    goal_pub = n.advertise<geometry_msgs::PoseStamped>("/clicked_point",1000);
+    goal_pub = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal",1000);
     start();
 	return true;
 }
@@ -77,13 +76,13 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
 	chatter_publisher = n.advertise<std_msgs::String>("chatter", 1000);
     chatter_sub = n.subscribe("chatter",1000,&QNode::chatter_callback,this);
     cmd_vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel",50);
+    odom_sub = n.subscribe("raw_odom",1000,&QNode::odom_callback,this);//odom_callback回调函数
     New_PTZ_pub = n.advertise<yzz_msgs::SetHolder>("/SetHolder",50);//云台控制
     Now_PTZ_sub = n.subscribe("/GetHolder",50,&QNode::GetHolderCallback,this);
     odom_sub = n.subscribe("/odom",50,&QNode::odom_callback,this);//odom_callback回调函数
     battery_sub = n.subscribe("/battery_state",50,&QNode::battery_callback,this);
-    set_pose_pub = n.advertise<geometry_msgs::PoseWithCovarianceStamped>("set_pose",50);
-    set_pose_sub=n.subscribe("set_pose",1000,&QNode::amcl_pose_callback,this);
-    goal_pub = n.advertise<geometry_msgs::PoseStamped>("/clicked_point",50);
+    set_pose_sub=n.subscribe("/initialpose",1000,&QNode::amcl_pose_callback,this);
+    goal_pub = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal",50);
 	start();
 	return true;
 }
@@ -294,7 +293,7 @@ void QNode::chatter_callback(const std_msgs::String &msg)
 }
 
 void QNode::run() {
-	ros::Rate loop_rate(1);
+    ros::Rate loop_rate(0.5);
 	int count = 0;
 	while ( ros::ok() ) {
 
@@ -314,7 +313,7 @@ void QNode::run() {
 
 
 void QNode::log( const LogLevel &level, const std::string &msg) {
-	logging_model.insertRows(logging_model.rowCount(),1);
+    logging_model.insertRows(logging_model.rowCount(),1);
 	std::stringstream logging_model_msg;
 	switch ( level ) {
 		case(Debug) : {
